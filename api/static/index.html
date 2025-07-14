@@ -17,6 +17,8 @@
             </label>
             <span id="fileName" class="file-name">No file chosen</span>
             <input type="file" id="fileInput" accept="image/*">
+            <img id="previewImage" src="#" alt="Image Preview" style="display:none; max-width: 300px; margin-top: 20px; border-radius: 10px;">
+
         </div>
         
         <button onclick="uploadImage()">Predict Disease</button>
@@ -31,13 +33,22 @@
     <script>
     // Update file name display
     document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
         const fileName = e.target.files[0] ? e.target.files[0].name : 'No file chosen';
         document.getElementById('fileName').textContent = fileName;
+
+        if (file) {
+           const preview = document.getElementById('previewImage');
+           preview.src = URL.createObjectURL(file);
+           preview.style.display = 'block';
+        }
+
     });
     
     async function uploadImage() {
         const fileInput = document.getElementById("fileInput");
         const file = fileInput.files[0];
+
         
         if (!file) {
             document.getElementById("result").innerText = "Please select an image first!";
@@ -60,7 +71,11 @@
             }
             
             const result = await response.json();
-            document.getElementById("result").innerText = `Prediction: ${result.class}`;
+            document.getElementById("result").innerHTML = `
+                <strong>Prediction:</strong> ${result.class} <br>
+                <strong>Confidence:</strong> ${(result.confidence * 100).toFixed(2)}%
+`;
+           
         } catch (error) {
             console.error('Error:', error);
             document.getElementById("result").innerText = "Error occurred during prediction. Please try again.";
